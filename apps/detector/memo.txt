@@ -1,0 +1,38 @@
+class User(db.Model):
+    __tablename__ = "users"  # 修正: owner -> users
+    _table_args__ = {'extend_existing': True}  # 既存のテーブルを拡張するオプション
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String, nullable=False)
+    level = db.Column(db.Integer, default=0)
+
+    # 中間テーブル 'mission_logs' を介した多対多のリレーションシップ
+    missions = relationship("Mission", secondary="mission_logs", back_populates="users")
+
+    # UserImageとのリレーションシップを追加
+    user_images = relationship("UserImage", back_populates="user")
+
+class Mission(db.Model):
+    __tablename__ = "missions"
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String, nullable=False)
+    description = db.Column(db.String, nullable=True)
+    reward_points = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    # 中間テーブル 'mission_logs' を介した多対多のリレーションシップ
+    users = relationship("User", secondary="mission_logs", back_populates="missions")
+
+class MissionLog(db.Model):
+    __tablename__ = "mission_logs"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))  # user_idをそのまま使用
+    mission_id = db.Column(db.Integer, db.ForeignKey("missions.id"))
+    is_completed = db.Column(db.Boolean, default=False)
+    completed_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    # リレーションシップを追加
+    user = relationship("User", back_populates="missions")
+    mission = relationship("Mission", back_populates="users")

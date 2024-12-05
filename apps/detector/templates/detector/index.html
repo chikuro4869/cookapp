@@ -1,0 +1,436 @@
+{% extends "detector/base.html" %}
+{% block content %}
+
+<div class="cozyspace-wrapper">
+  <div class="container">
+    <div class="cozyspace-img">
+      <h4>今の時刻は</h4>
+      <h3>{{ formatted_today }}</h3>
+      <h4>です！</h4>
+      {% if nowhour < 5 %}
+              <img src="{{ url_for('static', filename='cat/yasyoku.png') }}" alt="夜食中" class="cat-image" width="300" height="auto" />
+          {% elif nowhour < 10 %}
+              <img src="{{ url_for('static', filename='cat/hiyoko_morning.png') }}" alt="空腹な猫" class="cat-image" width="300" height="auto" />
+          {% elif nowhour < 12 %}
+              <img src="{{ url_for('static', filename='cat/kansyoku.png') }}" alt="間食中" class="cat-image" width="300" height="auto" />
+          {% elif nowhour < 15 %}
+              <img src="{{ url_for('static', filename='cat/afternoon.png') }}" alt="食べた猫" class="cat-image" width="300" height="auto" />
+          {% elif nowhour < 18 %}
+              <img src="{{ url_for('static', filename='cat/kansyoku.png') }}" alt="間食中" class="cat-image" width="300" height="auto" />
+          {% elif nowhour < 22 %}
+              <img src="{{ url_for('static', filename='cat/dinner.png') }}" alt="満腹な猫" class="cat-image" width="300" height="auto" />
+          {% else %}
+              <img src="{{ url_for('static', filename='cat/yasyoku.png') }}" alt="夜食中" class="cat-image" width="300" height="auto" />
+          {% endif %}
+    </div>
+    <div class="cozyspace-message">
+      <div class="box14">
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+          }
+          .todo-container {
+            max-width: 800px;
+            margin: 0 auto;
+          }
+          .input-box {
+            display: flex;
+            margin-bottom: 20px;
+          }
+          .input-box input {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+          }
+          .input-box button {
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+          }
+          .input-box button:hover {
+            background-color: #45a049;
+          }
+          .todo-list-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+          }
+          .todo-list {
+            list-style: none;
+            padding: 0;
+          }
+          .todo-list li {
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+          }
+          .todo-list li span {
+            font-size: 16px;
+            font-weight: bold;
+          }
+          .todo-list li div {
+            margin-top: 5px;
+            display: flex;
+            justify-content: space-between;
+          }
+          .todo-list button {
+            background: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+          }
+          .todo-list button:hover {
+            background: darkred;
+          }
+          .todo-list li.completed span {
+            text-decoration: line-through;
+            color: gray;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="todo-container">
+          <h3>今日の食習慣改善ミッション</h3>
+          <div class="input-box">
+            <input type="text" id="todoInput" placeholder="例：お酒を飲まない">
+            <button onclick="addTodo()">追加</button>
+          </div>
+          <div class="todo-list-container" id="todoListContainer">
+            <ul class="todo-list" id="todoList1"></ul>
+            <ul class="todo-list" id="todoList2"></ul>
+          </div>
+        </div>
+      
+        <script>
+          // デフォルトのToDoリスト項目
+          const defaultTodos = [
+            "朝ごはんを食べる",
+            "昼ごはんを食べる",
+            "夜ごはんを食べる",
+            "間食・夜食を食べない"
+          ];
+      
+          let toggleList = true; // 左右のリストを切り替えるフラグ
+      
+          // ページロード時に実行
+          window.onload = function() {
+            checkResetDaily(); // 日付を確認してリセット
+            loadTodos(); // 保存されたToDoをロード
+          };
+      
+          // ToDoを追加する関数
+          function addTodo() {
+            const todoInput = document.getElementById("todoInput");
+            const todoList1 = document.getElementById("todoList1");
+            const todoList2 = document.getElementById("todoList2");
+      
+            if (todoInput.value.trim() === "") {
+              alert("目標を入力してください！");
+              return;
+            }
+      
+            const listItem = createListItem(todoInput.value);
+      
+            // 左右のリストに交互に追加
+            if (toggleList) {
+              todoList1.appendChild(listItem);
+            } else {
+              todoList2.appendChild(listItem);
+            }
+            toggleList = !toggleList;
+      
+            saveTodos(); // 追加後に保存
+            todoInput.value = ""; // 入力欄をクリア
+          }
+      
+          // ToDo項目をHTML要素として作成
+          function createListItem(todoText) {
+            const listItem = document.createElement("li");
+            listItem.innerHTML = `
+              <span>${todoText}</span>
+              <div>
+                <button onclick="completeTask(this)">完了</button>
+                <button onclick="deleteTask(this)">削除</button>
+              </div>
+            `;
+            return listItem;
+          }
+      
+          // ToDoを完了状態にする関数
+          function completeTask(button) {
+            const listItem = button.parentElement.parentElement;
+            listItem.classList.toggle("completed");
+            saveTodos(); // 状態を保存
+          }
+      
+          // ToDoを削除する関数
+          function deleteTask(button) {
+            const listItem = button.parentElement.parentElement;
+            listItem.remove();
+            saveTodos(); // 状態を保存
+          }
+      
+          // ToDoリストを保存する関数
+          function saveTodos() {
+            const todos = { list1: [], list2: [] };
+            const todoList1 = document.querySelectorAll("#todoList1 li");
+            const todoList2 = document.querySelectorAll("#todoList2 li");
+      
+            todoList1.forEach(item => todos.list1.push({
+              text: item.querySelector("span").textContent,
+              completed: item.classList.contains("completed")
+            }));
+      
+            todoList2.forEach(item => todos.list2.push({
+              text: item.querySelector("span").textContent,
+              completed: item.classList.contains("completed")
+            }));
+      
+            // localStorageに保存
+            localStorage.setItem("todos", JSON.stringify(todos));
+            localStorage.setItem("lastSavedDate", new Date().toISOString().split("T")[0]); // 今日の日付を保存
+          }
+      
+          // ToDoリストをロードする関数
+          function loadTodos() {
+            const savedTodos = localStorage.getItem("todos");
+            if (!savedTodos) return;
+      
+            const todos = JSON.parse(savedTodos);
+            const todoList1 = document.getElementById("todoList1");
+            const todoList2 = document.getElementById("todoList2");
+      
+            todoList1.innerHTML = "";
+            todoList2.innerHTML = "";
+      
+            todos.list1.forEach(item => {
+              const listItem = createListItem(item.text);
+              if (item.completed) listItem.classList.add("completed");
+              todoList1.appendChild(listItem);
+            });
+      
+            todos.list2.forEach(item => {
+              const listItem = createListItem(item.text);
+              if (item.completed) listItem.classList.add("completed");
+              todoList2.appendChild(listItem);
+            });
+          }
+      
+          // 一日経過している場合にリセット
+          function checkResetDaily() {
+            const lastSavedDate = localStorage.getItem("lastSavedDate");
+            const today = new Date().toISOString().split("T")[0];
+      
+            if (lastSavedDate !== today) {
+              localStorage.removeItem("todos"); // ToDoリストをリセット
+              localStorage.setItem("lastSavedDate", today); // 今日の日付を保存
+              alert("一日経過したため、食生活改善ミッションをリセットしました！");
+              initializeDefaultTodos(); // デフォルトの項目を追加
+            }
+          }
+      
+          // デフォルトのToDoを設定
+          function initializeDefaultTodos() {
+            const todoList1 = document.getElementById("todoList1");
+            const todoList2 = document.getElementById("todoList2");
+      
+            todoList1.innerHTML = "";
+            todoList2.innerHTML = "";
+      
+            defaultTodos.forEach((todo, index) => {
+              const listItem = createListItem(todo);
+              if (index % 2 === 0) {
+                todoList1.appendChild(listItem); // 偶数番目は左列
+              } else {
+                todoList2.appendChild(listItem); // 奇数番目は右列
+              }
+            });
+      
+            saveTodos(); // 初期化後に保存
+          }
+        </script>
+      </div> 
+    </div>
+  </div>
+</div>
+
+
+<!-- 画像アップロード画面へのリンクを追加する -->
+<div class="col-md-10 text-right dt-image-register-btn">
+  <a href="{{ url_for('detector.upload_image') }}" class="btn btn-primary">画像新規登録</a>
+  {% if sort_order == "asc" %}
+    <a href="{{ url_for('detector.index', sort='desc') }}">降順に変更する場合クリック</a>
+  {% else %}
+    <a href="{{ url_for('detector.index', sort='asc') }}">昇順に変更する場合クリック</a>
+  {% endif %}
+</div>
+
+<!-- 画像一覧を表示する -->
+{% for user_image in user_images %}
+  <div class="card col-md-7 dt-image-content">
+    <header class="d-frex justify-content-between">
+      <div class="dt-image-username">{{ user_image.User.username }}</div>
+      <!-- ボタンを含む操作エリア -->
+      <div class="d-flex flex-row-reverse">
+        <!-- 削除ボタン -->
+        <div class="p-2">
+          <form action="{{ url_for('detector.delete_image', image_id=user_image.UserImage.id) }}" method="POST">
+            {{ delete_form.csrf_token }}
+            {% if current_user.id == user_image.User.id %}
+              {{ delete_form.submit(class="btn btn-danger") }}
+            {% else %}
+              {{ delete_form.submit(class="btn btn-danger", disabled="disabled") }}
+            {% endif %}
+          </form>
+        </div>
+        <!-- タグ編集ボタン -->
+        <div class="p-2">
+            <a href="{{ url_for('detector.edit_image', image_id=user_image.UserImage.id) }}" class="btn btn-warning">編集</a>
+        </div>
+    </header>
+
+    <!-- 画像表示エリア -->
+    <section>
+      <img src="{{ url_for('detector.image_file', filename=user_image.UserImage.image_path) }}" alt="アップロード画像" class="img-fluid" />
+    </section>
+
+    <footer>
+        <!-- 検出時刻を表示する -->
+        <p>検出した時刻: 
+          {% if user_image.UserImage.detected_at %}
+            {{ user_image.UserImage.detected_at.strftime('%Y-%m-%d %H:%M:%S') }}
+
+          {% else %}
+            時刻未設定
+          {% endif %}
+        </p>
+
+        <p>食事時間:
+          {% set hour = user_image.UserImage.detected_at.hour if user_image.UserImage.detected_at else 0 %}
+          {% set points = 0 %}  <!-- ポイントの初期化 -->
+          
+          {% if hour < 5 %}
+            夜食
+            <p>ミッション: 夜食は控えよう・・・</p>
+            {% set points = 10 %}
+          {% elif hour < 10 %}
+            朝食
+            <p>ミッション: 朝食を食べるクリア！！</p>
+            {% set points = 10 %}
+            <img src="{{ url_for('static', filename='cat/cat_middle.png') }}" alt="夜食中" class="cat-image" width="300" height="auto" />
+          {% elif hour < 12 %}
+            間食
+            <p>ミッション: 間食は控えよう・・・</p>
+            {% set points = 10 %}
+          {% elif hour < 15 %}
+            昼食
+            <p>ミッション: 昼食を食べるクリア！！</p>
+            {% set points = 10 %}
+          {% elif hour < 18 %}
+            間食
+            <p>ミッション: 間食は控えよう・・・</p>
+            {% set points = 10 %}
+          {% elif hour < 22 %}
+            夕食
+            <p>ミッション: 夕食を食べるクリア！！</p>
+            {% set points = 10 %}
+            {% set mission = 'クリア' %}
+          {% else %}
+            夜食
+            <p>ミッション: 夜食は控えよう・・・</p>
+            {% set points = 10 %}
+          {% endif %}
+        </p>
+
+      <!--タグ情報を表示する-->
+      <p>料理名</p>
+      <ul>
+        {% for tag in user_image_tag_dict[user_image.UserImage.id] %}
+        <li>#{{ tag.tag_name }}</li>
+        {% endfor %}
+      </ul>
+      <!--メモ情報を表示する-->
+      <div>
+        {% for tag in user_image_tag_dict[user_image.UserImage.id] %}
+        {% if tag.note %}
+        <p>メモ </p>
+        <p>{{ tag.note }}</p>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </footer>
+  </div>
+{% endfor %}
+
+{% if pagination %}
+  <div class="pagination">
+    {% if pagination.has_prev %}
+      <a href="{{ url_for('detector.index', page=pagination.prev_num, sort=sort_order) }}"class="icon prev"><<</a>
+    {% endif %}
+
+    {% for page_num in range(1, pagination.pages + 1) %}
+      {% if page_num == pagination.page %}
+        <span class="icon current">{{ page_num }}</span>
+      {% else %}
+        <a href="{{ url_for('detector.index', page=page_num, sort=sort_order) }}" class="icon">{{ page_num }}</a>
+      {% endif %}
+    {% endfor %}
+
+    {% if pagination.has_next %}
+      <a href="{{ url_for('detector.index', page=pagination.next_num, sort=sort_order) }}" class="icon next">>></a>
+    {% endif %}
+  </div>
+{% else %}
+  <p>No pagination available.</p>
+{% endif %}
+
+
+<!-- ページの一番下に追加 -->
+<div id="backToTop" onclick="scrollToTop()">⬆️ 一番上へ</div>
+<style>
+  #backToTop {
+    display: none; /* デフォルトは非表示 */
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 50px;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 1000; /* 他の要素より上に表示 */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  #backToTop:hover {
+    background-color: #45a049;
+  }
+</style>
+<script>
+  // スクロール位置を監視してボタンを表示・非表示
+  window.onscroll = function() {
+    const backToTop = document.getElementById("backToTop");
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+      backToTop.style.display = "block";
+    } else {
+      backToTop.style.display = "none";
+    }
+  };
+
+  // ページの一番上へスムーズにスクロール
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
+
+{% endblock %}

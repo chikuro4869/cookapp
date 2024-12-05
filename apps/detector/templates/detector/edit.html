@@ -1,0 +1,23 @@
+{% extends "detector/base.html" %}
+
+{% block content %}
+  <h1>タグとメモの編集</h1>
+  <p>タグ名</p>
+  <!-- タグ編集フォーム -->
+  <form method="POST" action="{{ url_for('detector.edit_image', image_id=image_id) }}">
+    {{ form.csrf_token }}  <!-- CSRFトークンの確認 -->
+    <div>
+      <input type="text" id="tag_name" name="tag_name" value="{{ user_image_tags | join(', ') }}" required>
+    </div>
+    <button type="submit" class="btn btn-primary">タグを更新</button> <!-- 送信ボタン -->
+  </form>
+  <p>メモ</p>
+  <!-- メモ編集フォーム -->
+  <form method="POST" action="{{ url_for('detector.edit_image', image_id=image_id) }}">
+    {{ form.csrf_token }}  <!-- CSRFトークンの確認 -->
+    <div>
+      <textarea name="note" rows="4" cols="50">{{ note }}</textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">メモを更新</button>
+  </form>
+{% endblock %}

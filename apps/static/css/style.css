@@ -1,0 +1,156 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* 横スクロールを無効化 */
+}
+
+body {
+    background-color: #f5f5f5;
+}
+h4 {
+   margin-top: 20px;
+}
+input[type="search"] {
+    background-color: #f5f5f5;
+}
+.dt-auth-main {
+    width: 400px;
+    margin-top: 45px;
+}
+.dt-auth-main .card {
+    box-shadow: 0 12px 18px 2px rgba(34, 0, 51, 0.04), 0 6px 22px 4px
+    rgba(7, 48, 114, 0.12),
+    0 6px 10px -4px rgba(14, 13, 26, 0.12) !important;
+    border-radius: 16px;
+}
+.dt-auth-main .dt-auth-login {
+    height: 300px !important;
+}
+.dt-auth-main .dt-auth-signup {
+    height: 340px !important;
+}
+.dt-auth-main header {
+    text-align: center;
+    margin: 30px 0 0 0;
+    font-size: 24px;
+}
+.dt-auth-main section {
+    width: 300px;
+    margin: 10px auto;
+}
+.dt-auth-flash {
+    font-size: 14px;
+    color: #9c1a1c;
+}
+.dt-auth-input {
+        margin-top: 10px;
+}
+.dt-auth-btn {
+    margin: 30px 0 0 0;
+}
+.dt-search {
+    height: 28px !important;
+}
+.dt-image-content {
+    margin: 20px auto;
+    padding: 0;
+}
+.dt-image-username {
+    padding-top: 15px;
+}
+.dt-image-register-btn {
+    padding: 10px 47px 0 0;
+}
+.dt-image-content header {
+    padding: 10px 10px 0 10px;
+}
+.dt-image-content section {
+    padding: 10px 0;
+    margin: auto;
+}
+.dt-image-content footer {
+    padding: 10px;
+}
+.dt-image-content section img {
+    width: 100%;
+}
+.dt-image-file {
+    display: none;
+}
+.dt-image-submit {
+    margin-left: 10px;
+}
+
+.unlocked {
+    color: green;
+}
+
+.locked {
+    color: gray;
+}
+
+.cozyspace-img, .cozyspace-message {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 100px; /* 画像とメッセージの間に右側の余白を追加 */
+}
+
+
+.box14 {
+    padding: 3em 3em; /* 内側に余白を追加 */
+    margin: 2em 0;
+    background: #d6ebff;
+    box-shadow: 0px 0px 0px 10px #d6ebff;
+    border: dashed 2px white;
+}
+
+.box14 p {
+    margin: 0; 
+    padding: 0;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.icon {
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #333;
+    font-size: 18px;
+    border-radius: 5px;
+    margin: 0 5px;
+}
+
+.icon:hover {
+    background-color: #a26769;
+    color: #fff;
+}
+
+.icon.current {
+    font-weight: bold;
+    background-color: #6d2e46;
+    color: white;
+}
+
+.icon.prev,
+.icon.next {
+    font-weight: bold;
+    padding: 10px 15px;
+}
+
+.icon.prev:hover,
+.icon.next:hover {
+    background-color: #6d2e46;
+    color: white;
+}
+
+
+  
+  
+  
+
+

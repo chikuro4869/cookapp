@@ -1,0 +1,57 @@
+{% extends "detector/base.html" %}
+{% block content %}
+    <h1>アチーブメント一覧</h1>
+    <h2>ユーザー {{ user_id }} のアチーブメント</h2>
+    <p>それぞれの料理で３回ずつ検出したものは達成、検出していないものは未達成と表示している</p>
+    <ul>
+        {% for tag_name, achieved in achievements.items() %}
+        <li>
+            {{ tag_name }} >>>>  <!--料理名-->
+            検出回数: {{ achieved[1] }} >>>>
+            {% if achieved[0] %}
+            <strong>達成</strong>
+            {% else %}
+            未達成
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+
+<!-- ページの一番下に追加 -->
+<div id="backToTop" onclick="scrollToTop()">⬆️ 一番上へ</div>
+<style>
+  #backToTop {
+    display: none; /* デフォルトは非表示 */
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 50px;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 1000; /* 他の要素より上に表示 */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  #backToTop:hover {
+    background-color: #45a049;
+  }
+</style>
+<script>
+  // スクロール位置を監視してボタンを表示・非表示
+  window.onscroll = function() {
+    const backToTop = document.getElementById("backToTop");
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+      backToTop.style.display = "block";
+    } else {
+      backToTop.style.display = "none";
+    }
+  };
+
+  // ページの一番上へスムーズにスクロール
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+{% endblock %}

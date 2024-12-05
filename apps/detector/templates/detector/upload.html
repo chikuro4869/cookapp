@@ -1,0 +1,54 @@
+{% extends "detector/base.html" %}
+{% block content %}
+<div>
+    <!-- フラッシュメッセージの表示 -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="container mt-3">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <!-- 閉じるボタン -->
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <h4>画像新規登録</h4>
+    <p>アップロードする画像を選択してください</p>
+    <form action="{{ url_for('detector.upload_image') }}" method="post" enctype="multipart/form-data" novalidate="novalidate">
+        {{ form.csrf_token }}
+        <div>
+            <label>
+                <span> {{ form.image(class="form-control-file") }}</span>
+            </label>
+        </div>
+        {% for error in form.image.errors %}
+        <span style="color: red;">{{ error }}</span>
+        {% endfor %}
+        <hr />
+        <div>
+            <label> {{ form.submit(class="btn btn-primary") }} </label>
+        </div>
+    </form>
+</div>
+
+<!-- スクリプト部分 -->
+<script>
+    // アラートを自動で閉じるスクリプト（オプション）
+    setTimeout(function() {
+        // 全てのアラートをフェードアウトで閉じる
+        $('.alert').alert('close');
+    }, 5000);  // 5000ms = 5秒後に自動で閉じる
+
+    // アラートを手動で閉じる機能（×ボタンの動作）
+    $(document).on('click', '.alert .close', function() {
+        $(this).closest('.alert').alert('close');
+    });
+</script>
+
+{% endblock %}

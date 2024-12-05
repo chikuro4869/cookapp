@@ -1,0 +1,141 @@
+{% extends "detector/base.html" %}
+{% block content %}
+    
+    <h1>ジャンル別</h1>
+    <p>これまで食べた料理の記録</p>
+    <div style="width: 50%">
+      <canvas id="pie-chart" height="300" width="450"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+    <script>
+      // データの定義
+      var pieData = [
+        {
+          value: {{ yosyoku_total }},
+          backgroundColor: "#9acce3",
+          label: "洋食"
+        },
+        {
+          value: {{ tyuka_total }},
+          backgroundColor: "#70b062",
+          label: "中華"
+        },
+        {
+          value: {{ wasyoku_total }},
+          backgroundColor: "#dbdf19",
+          label: "和食"
+        },
+        {
+          value: {{ other_total }},
+          backgroundColor: "#a979ad",
+          label: "その他"
+        }
+      ];
+
+      // グラフの作成
+      var ctx = document.getElementById("pie-chart").getContext("2d");
+      var myPieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: pieData.map(item => item.label),
+          datasets: [{
+            data: pieData.map(item => item.value),
+            backgroundColor: pieData.map(item => item.backgroundColor)
+          }]
+        },
+        options: {
+          plugins: {
+            // datalabels プラグインの設定
+            datalabels: {
+              display: true,  // ラベルを常に表示
+              color: 'black', // ラベルの色
+              font: {
+                weight: 'bold' // ラベルのフォントの太さ
+              },
+              formatter: (value, context) => {
+                return context.chart.data.labels[context.dataIndex] + ': ' + value;
+              }
+            }
+          }
+        }
+      });
+    </script>
+
+  <h1>日付別の合計カロリー</h1>
+  <div style="width: 50%">
+    <canvas id="myBarChart" width="800" height="800"></canvas>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+  <script>
+    // 棒グラフのラベル（日付）
+    var dates = {{ dates|tojson|safe }}; // サーバーから渡された日付データ
+    var calorieData = {{ calories_list|tojson|safe }}; // サーバーから渡されたカロリーデータ
+
+    // 棒グラフの設定
+    var ctx = document.getElementById("myBarChart").getContext("2d");
+    var myBarChart = new Chart(ctx, {
+        type: 'bar', // グラフの種類
+        data: {
+            labels: dates, // データ項目のラベル
+            datasets: [{
+                label: "カロリー",
+                backgroundColor: "rgba(75,192,192,0.4)", // 背景色
+                borderColor: "rgba(75,192,192,1)", // 枠線の色
+                data: calorieData // カロリーデータ
+            }]
+        },
+        options: {
+            scales: {
+                y: { // Y軸の設定
+                    beginAtZero: true // 目盛りの開始値を 0 に設定
+                }
+            }
+        }
+    });
+</script>
+
+<!-- ページの一番下に追加 -->
+<div id="backToTop" onclick="scrollToTop()">⬆️ 一番上へ</div>
+<style>
+  #backToTop {
+    display: none; /* デフォルトは非表示 */
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 50px;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 1000; /* 他の要素より上に表示 */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  #backToTop:hover {
+    background-color: #45a049;
+  }
+</style>
+<script>
+  // スクロール位置を監視してボタンを表示・非表示
+  window.onscroll = function() {
+    const backToTop = document.getElementById("backToTop");
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+      backToTop.style.display = "block";
+    } else {
+      backToTop.style.display = "none";
+    }
+  };
+
+  // ページの一番上へスムーズにスクロール
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
+{% endblock %}
