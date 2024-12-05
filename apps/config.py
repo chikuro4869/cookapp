@@ -26,5 +26,13 @@ class TestingConfig(BaseConfig):
     SQLALCHEMY_TRACK_MODIFICATIONS=False
     SQLALCHEMY_ECHO=True
 
+class ProductionConfig(BaseConfig):
+    SQLALCHEMY_DATABASE_URI = f"sqlite:///{basedir / 'production.sqlite'}"
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ECHO = False  # 例えば、本番環境ではSQLのログ出力を無効にする
+
+
 #config辞書にマッピングする
-config = {"testing":TestingConfig,"local":LocalConfig,}
+config = {"testing":TestingConfig,
+          "local":LocalConfig,
+          "production": ProductionConfig,}
