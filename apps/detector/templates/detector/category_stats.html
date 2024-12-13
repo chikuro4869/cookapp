@@ -1,141 +1,232 @@
 {% extends "detector/base.html" %}
 {% block content %}
     
-    <h1>ジャンル別</h1>
-    <p>これまで食べた料理の記録</p>
-    <div style="width: 50%">
-      <canvas id="pie-chart" height="300" width="450"></canvas>
-    </div>
+<h1>ジャンル別</h1>
+<p>これまで食べた料理の記録</p>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<!-- ジャンルを選択するフォーム -->
+<select class="input-genre">
+  <option value="和食">和食</option>
+  <option value="洋食">洋食</option>
+  <option value="中華">中華</option>
+  <option value="その他">その他</option>
+</select>
+<button class="complete-genre-btn">ジャンルを追加</button>
+<button class="reset-genre-btn">リセット</button>
 
-    <script>
-      // データの定義
-      var pieData = [
-        {
-          value: {{ yosyoku_total }},
-          backgroundColor: "#9acce3",
-          label: "洋食"
-        },
-        {
-          value: {{ tyuka_total }},
-          backgroundColor: "#70b062",
-          label: "中華"
-        },
-        {
-          value: {{ wasyoku_total }},
-          backgroundColor: "#dbdf19",
-          label: "和食"
-        },
-        {
-          value: {{ other_total }},
-          backgroundColor: "#a979ad",
-          label: "その他"
+<div style="width: 50%">
+  <canvas id="pie-chart" height="300" width="450"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+<script>
+// 初期データをローカルストレージから読み込み
+let yosyoku_total = parseInt(localStorage.getItem('yosyoku_total')) || 0;
+let tyuka_total = parseInt(localStorage.getItem('tyuka_total')) || 0;
+let wasyoku_total = parseInt(localStorage.getItem('wasyoku_total')) || 0;
+let other_total = parseInt(localStorage.getItem('other_total')) || 0;
+
+// グラフのデータ定義
+const pieData = [
+  { value: yosyoku_total, backgroundColor: "#9acce3", label: "洋食" },
+  { value: tyuka_total, backgroundColor: "#70b062", label: "中華" },
+  { value: wasyoku_total, backgroundColor: "#dbdf19", label: "和食" },
+  { value: other_total, backgroundColor: "#a979ad", label: "その他" }
+];
+
+// グラフの初期化
+const ctx = document.getElementById("pie-chart").getContext("2d");
+const myPieChart = new Chart(ctx, {
+  type: 'pie',
+  data: {
+    labels: pieData.map(item => item.label),
+    datasets: [{
+      data: pieData.map(item => item.value),
+      backgroundColor: pieData.map(item => item.backgroundColor)
+    }]
+  },
+  options: {
+    plugins: {
+      datalabels: {
+        display: true,
+        color: 'black',
+        font: { weight: 'bold' },
+        formatter: (value, context) => {
+          return context.chart.data.labels[context.dataIndex] + ': ' + value;
         }
-      ];
+      }
+    }
+  }
+});
 
-      // グラフの作成
-      var ctx = document.getElementById("pie-chart").getContext("2d");
-      var myPieChart = new Chart(ctx, {
-        type: 'pie',
+// 入力フォームでのイベント処理
+document.querySelector('.complete-genre-btn').addEventListener('click', () => {
+  // 選択したジャンルを取得
+  const selectedGenre = document.querySelector('.input-genre').value;
+
+  // カテゴリ別の合計を更新
+  if (selectedGenre === "中華") {
+    tyuka_total++;
+    localStorage.setItem('tyuka_total', tyuka_total); // ローカルストレージに保存
+  } else if (selectedGenre === "洋食") {
+    yosyoku_total++;
+    localStorage.setItem('yosyoku_total', yosyoku_total); // ローカルストレージに保存
+  } else if (selectedGenre === "和食") {
+    wasyoku_total++;
+    localStorage.setItem('wasyoku_total', wasyoku_total); // ローカルストレージに保存
+  } else {
+    other_total++;
+    localStorage.setItem('other_total', other_total); // ローカルストレージに保存
+  }
+
+  // グラフデータを更新
+  myPieChart.data.datasets[0].data = [yosyoku_total, tyuka_total, wasyoku_total, other_total];
+  myPieChart.update();
+});
+
+// リセットボタンでの処理
+document.querySelector('.reset-genre-btn').addEventListener('click', () => {
+  // 各ジャンルのカウントをリセット
+  yosyoku_total = 0;
+  tyuka_total = 0;
+  wasyoku_total = 0;
+  other_total = 0;
+
+  // ローカルストレージもリセット
+  localStorage.setItem('yosyoku_total', 0);
+  localStorage.setItem('tyuka_total', 0);
+  localStorage.setItem('wasyoku_total', 0);
+  localStorage.setItem('other_total', 0);
+
+  // グラフデータをリセット
+  myPieChart.data.datasets[0].data = [yosyoku_total, tyuka_total, wasyoku_total, other_total];
+  myPieChart.update();
+});
+
+// ページロード時にローカルストレージのデータを反映
+myPieChart.data.datasets[0].data = [yosyoku_total, tyuka_total, wasyoku_total, other_total];
+myPieChart.update();
+</script>
+
+
+
+<h1>日付別の合計カロリー</h1>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.js"></script>
+<div style="width: 50%">
+  <canvas id="myBarChart" width="800" height="800"></canvas>
+</div>
+
+<!-- 入力フォーム -->
+<div class="input-area">
+  <div class="input-area__inner">
+    <p>日付</p>
+    <input class="chart input-date" type="date">
+    <p>カロリー</p>
+    <input class="chart input-calorie" type="number" placeholder="例: 200">
+    <button class="complete-btn">入力完了</button>
+  </div>
+</div>
+
+<p>今日のカロリー</p>
+  <div id="data-container"></div> <!-- データ表示用のコンテナ -->
+  <canvas id="myBarChart"></canvas>
+
+  <script>
+    // 初期データ（サーバーから渡されたデータ）
+    var dates = {{ dates|tojson|safe }}; // サーバーから渡された日付データ
+    var calorieData = {{ calories_list|tojson|safe }}; // サーバーから渡されたカロリーデータ
+
+    // ローカルストレージからデータを読み込む関数
+    function loadLocalStorageData() {
+      const savedData = localStorage.getItem("caloriesData");
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        dates = parsedData.dates || dates;
+        calorieData = parsedData.calorieData || calorieData;
+      }
+    }
+
+    // ローカルストレージにデータを保存する関数
+    function saveToLocalStorage() {
+      const data = { dates, calorieData };
+      localStorage.setItem("caloriesData", JSON.stringify(data)); // ローカルストレージに保存
+    }
+
+    // 日付とカロリーデータを表示する関数
+    function displayData() {
+      const dataContainer = document.getElementById("data-container");
+
+      let htmlContent = "<ul>";
+      for (let i = 0; i < dates.length; i++) {
+        htmlContent += `<li>${dates[i]}: ${calorieData[i]} kcal</li>`;
+      }
+      htmlContent += "</ul>";
+      dataContainer.innerHTML = htmlContent;
+    }
+
+    // グラフの設定
+    function createChart() {
+      var ctx = document.getElementById("myBarChart").getContext("2d");
+      var myBarChart = new Chart(ctx, {
+        type: 'bar', // グラフの種類
         data: {
-          labels: pieData.map(item => item.label),
+          labels: dates, // 日付をラベルに設定
           datasets: [{
-            data: pieData.map(item => item.value),
-            backgroundColor: pieData.map(item => item.backgroundColor)
+            label: "カロリー",
+            backgroundColor: "rgba(75,192,192,0.4)", // 背景色
+            borderColor: "rgba(75,192,192,1)", // 枠線の色
+            data: calorieData // カロリーデータをセット
           }]
         },
         options: {
-          plugins: {
-            // datalabels プラグインの設定
-            datalabels: {
-              display: true,  // ラベルを常に表示
-              color: 'black', // ラベルの色
-              font: {
-                weight: 'bold' // ラベルのフォントの太さ
-              },
-              formatter: (value, context) => {
-                return context.chart.data.labels[context.dataIndex] + ': ' + value;
-              }
+          scales: {
+            y: { // Y軸の設定
+              beginAtZero: true // 目盛りを0からスタート
             }
           }
         }
       });
-    </script>
-
-  <h1>日付別の合計カロリー</h1>
-  <div style="width: 50%">
-    <canvas id="myBarChart" width="800" height="800"></canvas>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-
-  <script>
-    // 棒グラフのラベル（日付）
-    var dates = {{ dates|tojson|safe }}; // サーバーから渡された日付データ
-    var calorieData = {{ calories_list|tojson|safe }}; // サーバーから渡されたカロリーデータ
-
-    // 棒グラフの設定
-    var ctx = document.getElementById("myBarChart").getContext("2d");
-    var myBarChart = new Chart(ctx, {
-        type: 'bar', // グラフの種類
-        data: {
-            labels: dates, // データ項目のラベル
-            datasets: [{
-                label: "カロリー",
-                backgroundColor: "rgba(75,192,192,0.4)", // 背景色
-                borderColor: "rgba(75,192,192,1)", // 枠線の色
-                data: calorieData // カロリーデータ
-            }]
-        },
-        options: {
-            scales: {
-                y: { // Y軸の設定
-                    beginAtZero: true // 目盛りの開始値を 0 に設定
-                }
-            }
-        }
-    });
-</script>
-
-<!-- ページの一番下に追加 -->
-<div id="backToTop" onclick="scrollToTop()">⬆️ 一番上へ</div>
-<style>
-  #backToTop {
-    display: none; /* デフォルトは非表示 */
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 50px;
-    font-size: 16px;
-    cursor: pointer;
-    z-index: 1000; /* 他の要素より上に表示 */
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  #backToTop:hover {
-    background-color: #45a049;
-  }
-</style>
-<script>
-  // スクロール位置を監視してボタンを表示・非表示
-  window.onscroll = function() {
-    const backToTop = document.getElementById("backToTop");
-    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
-      backToTop.style.display = "block";
-    } else {
-      backToTop.style.display = "none";
     }
-  };
 
-  // ページの一番上へスムーズにスクロール
-  function scrollToTop() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-</script>
+    // ページ読み込み時の処理
+    loadLocalStorageData(); // ローカルストレージからデータを読み込み
+    displayData(); // 初期データを表示
+    createChart(); // 初期グラフを作成
+
+    // 完了ボタンがクリックされたときの処理
+    document.querySelector(".complete-btn").addEventListener("click", function () {
+      var inputDate = document.querySelector(".input-date").value;
+      var inputCalorie = parseInt(document.querySelector(".input-calorie").value, 10);
+
+      if (!inputDate || isNaN(inputCalorie)) {
+        alert("日付とカロリーを正しく入力してください。");
+        return;
+      }
+
+      // 日付が既存のデータに含まれるかチェック
+      var index = dates.indexOf(inputDate);
+      if (index !== -1) {
+        // 既存の日付に対応するカロリーを加算
+        calorieData[index] += inputCalorie;
+      } else {
+        // 新しい日付を追加
+        dates.push(inputDate);
+        calorieData.push(inputCalorie);
+      }
+
+      // データをローカルストレージに保存
+      saveToLocalStorage();
+
+      // グラフを再描画
+      createChart();
+
+      // データを再表示
+      displayData();
+    });
+  </script>
+
 
 {% endblock %}
